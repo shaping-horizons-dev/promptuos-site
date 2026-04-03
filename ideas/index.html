@@ -270,6 +270,65 @@
     margin-left: 6px;
   }
 
+  /* Password gate */
+  .gate-overlay {
+    position: fixed;
+    inset: 0;
+    background: #f0fdf4;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gate-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 44px 40px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .gate-card .logo { margin-bottom: 6px; }
+  .gate-card h2 {
+    font-size: 18px;
+    color: #0f766e;
+    margin-bottom: 6px;
+  }
+  .gate-card p {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+  .gate-card input {
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .gate-card button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #059669, #0d9488);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .gate-card button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(5,150,105,0.3);
+  }
+  .gate-error {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+
   @media (max-width: 700px) {
     .layout {
       grid-template-columns: 1fr;
@@ -282,7 +341,21 @@
 </head>
 <body>
 
-<div class="page">
+<!-- Password gate -->
+<div class="gate-overlay" id="gate">
+  <div class="gate-card">
+    <div class="logo">Prompt<span>uos</span></div>
+    <h2>Ideas Board</h2>
+    <p>Enter the team password to continue</p>
+    <form onsubmit="return checkPass()">
+      <input type="password" id="gate-pass" placeholder="Password" autocomplete="off" autofocus>
+      <button type="submit">Enter</button>
+      <div class="gate-error" id="gate-error">Incorrect password. Try again.</div>
+    </form>
+  </div>
+</div>
+
+<div class="page" id="main-content" style="display:none">
   <div class="header">
     <div class="logo">Prompt<span>uos</span></div>
     <h1>Ideas Board</h1>
@@ -365,6 +438,40 @@
 
 <script>
   const WORKER_URL = "https://promptuos-ideas.alexgonza.workers.dev";
+  const PASS_KEY = "promptuos_ideas_access";
+  const PASS_HASH = "a3c2f8e1"; // simple hash of the password
+
+  function simpleHash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    }
+    return (h >>> 0).toString(16);
+  }
+
+  function unlock() {
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("main-content").style.display = "block";
+    loadIdeas();
+  }
+
+  // Check if already authenticated
+  if (localStorage.getItem(PASS_KEY) === simpleHash("Shaping2026!")) {
+    unlock();
+  }
+
+  function checkPass() {
+    const input = document.getElementById("gate-pass").value;
+    if (input === "Shaping2026!") {
+      localStorage.setItem(PASS_KEY, simpleHash(input));
+      unlock();
+    } else {
+      document.getElementById("gate-error").style.display = "block";
+      document.getElementById("gate-pass").value = "";
+      document.getElementById("gate-pass").focus();
+    }
+    return false;
+  }
 
   // Formatting toolbar
   function fmt(type) {
@@ -478,7 +585,6 @@
     return div.innerHTML;
   }
 
-  loadIdeas();
 </script>
 
 </body>
