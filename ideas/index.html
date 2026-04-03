@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promptuos — Share Your Ideas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0fdf4;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .container {
+    background: #fff;
+    border-radius: 16px;
+    padding: 44px 40px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .logo span { color: #0d9488; }
+  h1 {
+    font-size: 22px;
+    color: #0f766e;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+  input, textarea, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f9fafb;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 120px; }
+  .field { margin-bottom: 20px; }
+  .field-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .field-row .field { flex: 1; margin-bottom: 0; }
+  button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #059669, #0d9488);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 8px;
+  }
+  button[type="submit"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(5,150,105,0.3);
+  }
+  button[type="submit"]:active {
+    transform: translateY(0);
+  }
+  .hint {
+    font-size: 12.5px;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+  .footer {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 13px;
+    color: #94a3b8;
+  }
+  .category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .category-pills input[type="radio"] { display: none; }
+  .category-pills label {
+    display: inline-block;
+    padding: 7px 16px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0;
+  }
+  .category-pills input[type="radio"]:checked + label {
+    background: #0d9488;
+    color: #fff;
+    border-color: #0d9488;
+  }
+  .category-pills label:hover {
+    border-color: #0d9488;
+    color: #0d9488;
+  }
+  @media (max-width: 500px) {
+    .container { padding: 28px 22px; }
+    .field-row { flex-direction: column; gap: 0; }
+    .field-row .field { margin-bottom: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">Prompt<span>uos</span></div>
+  <h1>Share Your Ideas</h1>
+  <p class="subtitle">Help us build the best platform for ABA agencies. Drop any idea, feature request, or improvement — big or small. No login needed.</p>
+
+  <form action="https://formsubmit.co/alexander.gonzalez@promptuos.com" method="POST">
+    <!-- FormSubmit config -->
+    <input type="hidden" name="_subject" value="New Promptuos Idea Submitted">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" name="_template" value="box">
+    <input type="hidden" name="_next" value="https://promptuos.com/ideas/thanks.html">
+    <input type="text" name="_honey" style="display:none">
+
+    <div class="field-row">
+      <div class="field">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="First name or nickname" required>
+      </div>
+      <div class="field">
+        <label for="role">Your Role <span style="font-weight:400;color:#94a3b8;">(optional)</span></label>
+        <input type="text" id="role" name="role" placeholder="e.g. BCBA, RBT, Admin">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Category</label>
+    </div>
+    <div class="category-pills">
+      <input type="radio" id="cat-feature" name="category" value="New Feature" checked>
+      <label for="cat-feature">New Feature</label>
+      <input type="radio" id="cat-improve" name="category" value="Improvement">
+      <label for="cat-improve">Improvement</label>
+      <input type="radio" id="cat-integration" name="category" value="Integration">
+      <label for="cat-integration">Integration</label>
+      <input type="radio" id="cat-billing" name="category" value="Billing & Payroll">
+      <label for="cat-billing">Billing & Payroll</label>
+      <input type="radio" id="cat-scheduling" name="category" value="Scheduling">
+      <label for="cat-scheduling">Scheduling</label>
+      <input type="radio" id="cat-other" name="category" value="Other">
+      <label for="cat-other">Other</label>
+    </div>
+
+    <div class="field">
+      <label for="idea">Your Idea</label>
+      <textarea id="idea" name="idea" placeholder="Describe your idea, feature request, or suggestion..." required></textarea>
+      <p class="hint">Be as detailed or brief as you'd like — every idea counts.</p>
+    </div>
+
+    <div class="field">
+      <label for="priority">How important is this to you?</label>
+      <select id="priority" name="priority">
+        <option value="Nice to have">Nice to have</option>
+        <option value="Important">Important</option>
+        <option value="Critical">Critical — I need this</option>
+      </select>
+    </div>
+
+    <button type="submit">Submit Idea</button>
+  </form>
+
+  <div class="footer">
+    Promptuos &mdash; Built for ABA agencies
+  </div>
+</div>
+
+</body>
+</html>
