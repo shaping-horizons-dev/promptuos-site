@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Promptuos — Practice Management for ABA Agencies</title>
+<meta name="description" content="Promptuos is a modern practice management platform purpose-built for ABA agencies. Scheduling, billing, payroll, compliance — all in one place.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230d9488'/><text x='16' y='23' font-size='20' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>P</text></svg>">
+<style>
+  :root {
+    --teal-50: #f0fdfa;
+    --teal-100: #ccfbf1;
+    --teal-200: #99f6e4;
+    --teal-400: #2dd4bf;
+    --teal-500: #14b8a6;
+    --teal-600: #0d9488;
+    --teal-700: #0f766e;
+    --teal-800: #115e59;
+    --teal-900: #134e4a;
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --amber-400: #fbbf24;
+    --amber-500: #f59e0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--slate-800);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--slate-200);
+    transition: box-shadow 0.3s;
+  }
+  nav.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.08); }
+  .nav-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--teal-700);
+    letter-spacing: -0.5px;
+  }
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--teal-500), var(--teal-700));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--slate-600);
+    font-size: 14.5px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--teal-600); }
+  .nav-cta {
+    background: var(--teal-600) !important;
+    color: #fff !important;
+    padding: 9px 22px;
+    border-radius: 8px;
+    font-weight: 600 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--teal-700) !important; }
+
+  .mobile-menu { display: none; background: none; border: none; cursor: pointer; padding: 4px; }
+  .mobile-menu svg { width: 28px; height: 28px; color: var(--slate-700); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 140px 24px 100px;
+    background: linear-gradient(160deg, #f0fdfa 0%, #ffffff 40%, #f8fafc 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(20,184,166,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -150px;
+    left: -150px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(251,191,36,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teal-50);
+    border: 1px solid var(--teal-200);
+    color: var(--teal-700);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--teal-500);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-size: 48px;
+    line-height: 1.15;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+  }
+  .hero h1 span { color: var(--teal-600); }
+  .hero-text {
+    font-size: 18px;
+    color: var(--slate-500);
+    line-height: 1.7;
+    margin-bottom: 36px;
+    max-width: 520px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teal-600);
+    color: #fff;
+    padding: 14px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(13,148,136,0.3);
+  }
+  .btn-primary:hover { background: var(--teal-700); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(13,148,136,0.35); }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--slate-700);
+    padding: 14px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid var(--slate-300);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--teal-400); color: var(--teal-700); }
+
+  /* Hero visual */
+  .hero-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dashboard-preview {
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+  .dash-bar {
+    background: var(--slate-800);
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .dash-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dash-dot.r { background: #ff5f57; }
+  .dash-dot.y { background: #febc2e; }
+  .dash-dot.g { background: #28c840; }
+  .dash-content { padding: 24px; }
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .dash-title { font-size: 14px; font-weight: 700; color: var(--slate-700); }
+  .dash-tag {
+    font-size: 11px;
+    background: var(--teal-50);
+    color: var(--teal-700);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+  .dash-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .dash-stat {
+    background: var(--slate-50);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .dash-stat-value { font-size: 22px; font-weight: 800; color: var(--teal-600); }
+  .dash-stat-label { font-size: 10px; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .dash-rows { display: flex; flex-direction: column; gap: 8px; }
+  .dash-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--slate-50);
+    border-radius: 8px;
+  }
+  .dash-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .dash-row-name { font-size: 13px; font-weight: 600; color: var(--slate-700); flex: 1; }
+  .dash-row-detail { font-size: 11px; color: var(--slate-400); }
+  .dash-row-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+
+  /* ── LOGOS / TRUST ── */
+  .trust {
+    padding: 48px 24px;
+    background: #fff;
+    border-top: 1px solid var(--slate-100);
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .trust-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .trust-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--slate-400);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .trust-items {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    flex-wrap: wrap;
+    opacity: 0.5;
+  }
+  .trust-item {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--slate-400);
+    letter-spacing: -0.3px;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 100px 24px;
+    background: #fff;
+  }
+  .section-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+  .section-header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .section-label {
+    display: inline-block;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--teal-600);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+  }
+  .section-header p {
+    font-size: 17px;
+    color: var(--slate-500);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .feature-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.3s;
+  }
+  .feature-card:hover {
+    border-color: var(--teal-200);
+    box-shadow: 0 8px 30px rgba(13,148,136,0.08);
+    transform: translateY(-2px);
+  }
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  .fi-teal { background: var(--teal-100); }
+  .fi-amber { background: #fef3c7; }
+  .fi-blue { background: #dbeafe; }
+  .fi-purple { background: #ede9fe; }
+  .fi-rose { background: #ffe4e6; }
+  .fi-green { background: #dcfce7; }
+  .feature-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 10px;
+  }
+  .feature-card p {
+    font-size: 14.5px;
+    color: var(--slate-500);
+    line-height: 1.6;
+  }
+
+  /* ── BENEFITS ── */
+  .benefits-section {
+    padding: 100px 24px;
+    background: linear-gradient(180deg, var(--slate-50) 0%, #fff 100%);
+  }
+  .benefit-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    margin-bottom: 80px;
+  }
+  .benefit-row:last-child { margin-bottom: 0; }
+  .benefit-row.reverse { direction: rtl; }
+  .benefit-row.reverse > * { direction: ltr; }
+  .benefit-visual {
+    background: linear-gradient(135deg, var(--teal-50), var(--slate-50));
+    border-radius: 20px;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 320px;
+    border: 1px solid var(--slate-200);
+  }
+  .benefit-visual-inner { text-align: center; }
+  .benefit-big-icon { font-size: 80px; margin-bottom: 12px; }
+  .benefit-visual-label { font-size: 14px; color: var(--slate-400); font-weight: 600; }
+  .benefit-content h3 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin-bottom: 16px;
+    letter-spacing: -0.3px;
+  }
+  .benefit-content p {
+    font-size: 16px;
+    color: var(--slate-500);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .benefit-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .benefit-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14.5px;
+    color: var(--slate-600);
+  }
+  .benefit-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--teal-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--teal-700);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 100px 24px;
+    background: linear-gradient(135deg, var(--teal-800), var(--slate-900));
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(45,212,191,0.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .cta-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .cta-section h2 {
+    font-size: 38px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+  }
+  .cta-section p {
+    font-size: 17px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+  .cta-form {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .cta-input {
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 15px;
+    width: 300px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .cta-input::placeholder { color: rgba(255,255,255,0.4); }
+  .cta-input:focus { border-color: var(--teal-400); }
+  .cta-btn {
+    background: var(--teal-500);
+    color: #fff;
+    padding: 14px 30px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .cta-btn:hover { background: var(--teal-400); }
+  .cta-note {
+    margin-top: 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 48px 24px;
+    background: var(--slate-900);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .footer-inner {
+    max-width: 1140px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .footer-brand {
+    font-size: 18px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.7);
+  }
+  .footer-links { display: flex; gap: 28px; }
+  .footer-links a {
+    color: rgba(255,255,255,0.4);
+    text-decoration: none;
+    font-size: 13.5px;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: rgba(255,255,255,0.7); }
+  .footer-copy { color: rgba(255,255,255,0.25); font-size: 13px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; text-align: center; }
+    .hero h1 { font-size: 36px; }
+    .hero-text { margin: 0 auto 36px; }
+    .hero-actions { justify-content: center; }
+    .hero-visual { display: none; }
+    .features-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+    .benefit-row, .benefit-row.reverse { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+    .benefit-row.reverse { direction: ltr; }
+    .benefit-list { align-items: center; }
+    .nav-links { display: none; }
+    .mobile-menu { display: block; }
+  }
+  @media (max-width: 600px) {
+    .hero { padding: 120px 20px 60px; }
+    .hero h1 { font-size: 30px; }
+    .dash-stats { grid-template-columns: 1fr; }
+    .cta-section h2 { font-size: 28px; }
+    .section-header h2 { font-size: 28px; }
+    .cta-input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">P</div>
+      Promptuos
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#platform">Platform</a>
+      <a href="#contact" class="nav-cta">Request Early Access</a>
+    </div>
+    <button class="mobile-menu" onclick="document.querySelector('.nav-links').style.display = document.querySelector('.nav-links').style.display === 'flex' ? 'none' : 'flex'">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">Purpose-built for ABA</div>
+      <h1>Run your ABA agency<br>with <span>clarity</span></h1>
+      <p class="hero-text">Promptuos brings scheduling, billing, payroll, and compliance into one modern platform — so you can spend more time delivering care and less time on admin.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">
+          Request Early Access
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#features" class="btn-secondary">See Features</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="dashboard-preview">
+        <div class="dash-bar">
+          <div class="dash-dot r"></div>
+          <div class="dash-dot y"></div>
+          <div class="dash-dot g"></div>
+        </div>
+        <div class="dash-content">
+          <div class="dash-header">
+            <span class="dash-title">Weekly Dashboard</span>
+            <span class="dash-tag">Live</span>
+          </div>
+          <div class="dash-stats">
+            <div class="dash-stat">
+              <div class="dash-stat-value">94%</div>
+              <div class="dash-stat-label">Utilization</div>
+            </div>
+            <div class="dash-stat">
+              <div class="dash-stat-value">312</div>
+              <div class="dash-stat-label">Sessions</div>
+            </div>
+            <div class="dash-stat">
+              <div class="dash-stat-value">$48K</div>
+              <div class="dash-stat-label">Billed</div>
+            </div>
+          </div>
+          <div class="dash-rows">
+            <div class="dash-row">
+              <div class="dash-avatar" style="background:linear-gradient(135deg,#0d9488,#14b8a6)">MR</div>
+              <span class="dash-row-name">Maria R.</span>
+              <span class="dash-row-detail">BCBA</span>
+              <span class="dash-row-badge badge-green">On Track</span>
+            </div>
+            <div class="dash-row">
+              <div class="dash-avatar" style="background:linear-gradient(135deg,#6366f1,#818cf8)">JG</div>
+              <span class="dash-row-name">Jorge G.</span>
+              <span class="dash-row-detail">RBT</span>
+              <span class="dash-row-badge badge-blue">In Session</span>
+            </div>
+            <div class="dash-row">
+              <div class="dash-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">LC</div>
+              <span class="dash-row-name">Laura C.</span>
+              <span class="dash-row-detail">BCaBA</span>
+              <span class="dash-row-badge badge-amber">Auth Expiring</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<section class="trust">
+  <div class="trust-inner">
+    <div class="trust-label">Integrates with the tools you already use</div>
+    <div class="trust-items">
+      <span class="trust-item">Gusto</span>
+      <span class="trust-item">QuickBooks</span>
+      <span class="trust-item">Google Calendar</span>
+      <span class="trust-item">Office Puzzle</span>
+      <span class="trust-item">Availity</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Features</span>
+      <h2>Everything your agency needs</h2>
+      <p>From client intake to payroll, Promptuos replaces the patchwork of tools holding your agency back.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon fi-teal">&#128197;</div>
+        <h3>Smart Scheduling</h3>
+        <p>Match providers to clients by availability, credentials, location, and authorized hours. Conflict detection and automated reminders reduce no-shows.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-blue">&#128176;</div>
+        <h3>Billing & Claims</h3>
+        <p>Submit electronic claims, track authorizations, manage denials, and monitor revenue — all mapped to the correct CPT codes automatically.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-green">&#128178;</div>
+        <h3>Payroll Integration</h3>
+        <p>Session data flows directly into payroll. Support for multiple pay rates, contractor payments, and seamless integration with Gusto.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-purple">&#128203;</div>
+        <h3>Credential Tracking</h3>
+        <p>Monitor RBT certifications, BCBA licensure, background checks, and CPR — with automated alerts before anything expires.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-amber">&#128202;</div>
+        <h3>Authorization Management</h3>
+        <p>Track approved units per client and payer in real time. Get alerts when utilization is low or authorizations are nearing expiration.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon fi-rose">&#128200;</div>
+        <h3>Analytics & Reporting</h3>
+        <p>Utilization rates, cancellation trends, revenue per client, hours delivered vs. authorized — the KPIs that drive your business forward.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="benefits-section" id="platform">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-label">Platform</span>
+      <h2>Built for how ABA agencies actually work</h2>
+      <p>We understand the unique challenges of running a behavior analysis practice.</p>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-visual">
+        <div class="benefit-visual-inner">
+          <div class="benefit-big-icon">&#9889;</div>
+          <div class="benefit-visual-label">From referral to first session</div>
+        </div>
+      </div>
+      <div class="benefit-content">
+        <h3>Faster intake, shorter waitlists</h3>
+        <p>Streamline your referral pipeline with digital intake forms, automated insurance verification, and waitlist management that keeps families informed.</p>
+        <ul class="benefit-list">
+          <li><span class="benefit-check">&#10003;</span> Digital intake forms and consent documents</li>
+          <li><span class="benefit-check">&#10003;</span> Automated insurance eligibility checks</li>
+          <li><span class="benefit-check">&#10003;</span> Waitlist tracking with family notifications</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="benefit-row reverse">
+      <div class="benefit-visual">
+        <div class="benefit-visual-inner">
+          <div class="benefit-big-icon">&#128737;</div>
+          <div class="benefit-visual-label">Compliance without the overhead</div>
+        </div>
+      </div>
+      <div class="benefit-content">
+        <h3>Stay audit-ready, always</h3>
+        <p>HIPAA-compliant by design, with full audit trails, role-based access, and payer-specific documentation rules built into every workflow.</p>
+        <ul class="benefit-list">
+          <li><span class="benefit-check">&#10003;</span> HIPAA-compliant data handling</li>
+          <li><span class="benefit-check">&#10003;</span> Payer-specific documentation rules</li>
+          <li><span class="benefit-check">&#10003;</span> Complete audit trail on every action</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-visual">
+        <div class="benefit-visual-inner">
+          <div class="benefit-big-icon">&#128241;</div>
+          <div class="benefit-visual-label">In the field or at the office</div>
+        </div>
+      </div>
+      <div class="benefit-content">
+        <h3>Mobile-first for your team</h3>
+        <p>Your RBTs and BCBAs work in homes, schools, and clinics. Promptuos is designed for the field — session notes, data collection, and schedules from any device.</p>
+        <ul class="benefit-list">
+          <li><span class="benefit-check">&#10003;</span> Session notes and data collection on mobile</li>
+          <li><span class="benefit-check">&#10003;</span> Real-time schedule updates</li>
+          <li><span class="benefit-check">&#10003;</span> Drive time and mileage tracking</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-inner">
+    <h2>Ready to modernize your practice?</h2>
+    <p>Join the waitlist for early access. We're onboarding a limited number of ABA agencies for our initial launch.</p>
+    <form class="cta-form" onsubmit="event.preventDefault(); this.innerHTML='<p style=\'color:#fff;font-size:16px;font-weight:600;padding:14px;\'>Thank you! We\'ll be in touch soon.</p>';">
+      <input type="email" class="cta-input" placeholder="Enter your work email" required>
+      <button type="submit" class="cta-btn">Join Waitlist</button>
+    </form>
+    <p class="cta-note">No commitment required. We'll reach out when your spot is ready.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <span class="footer-brand">Promptuos</span>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#platform">Platform</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <span class="footer-copy">&copy; 2026 Promptuos. All rights reserved.</span>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+  });
+</script>
+
+</body>
+</html>
