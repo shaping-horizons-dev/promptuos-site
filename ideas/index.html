@@ -87,7 +87,38 @@
     box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
     background: #fff;
   }
-  textarea { resize: vertical; min-height: 100px; }
+  textarea { resize: vertical; min-height: 100px; border-radius: 0 0 10px 10px; border-top: none; }
+  .toolbar {
+    display: flex;
+    gap: 2px;
+    background: #f1f5f9;
+    border: 1.5px solid #d1d5db;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    padding: 4px 6px;
+  }
+  .toolbar button {
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+  }
+  .toolbar button:hover {
+    background: #e2e8f0;
+    color: #0f766e;
+  }
+  .toolbar .sep {
+    width: 1px;
+    background: #d1d5db;
+    margin: 2px 4px;
+  }
   .field { margin-bottom: 16px; }
   .pills {
     display: flex;
@@ -173,6 +204,19 @@
     color: #475569;
     line-height: 1.5;
     margin-bottom: 10px;
+  }
+  .idea-body strong { color: #1e293b; }
+  .idea-body em { font-style: italic; }
+  .idea-body ul, .idea-body ol {
+    padding-left: 20px;
+    margin: 4px 0;
+  }
+  .idea-body li { margin-bottom: 2px; }
+  .idea-body h3 {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 6px 0 2px;
   }
   .idea-meta {
     display: flex;
@@ -284,6 +328,15 @@
 
         <div class="field">
           <label for="idea">Your Idea</label>
+          <div class="toolbar">
+            <button type="button" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+            <button type="button" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+            <div class="sep"></div>
+            <button type="button" onclick="fmt('ul')" title="Bullet list">&#8226; List</button>
+            <button type="button" onclick="fmt('ol')" title="Numbered list">1. List</button>
+            <div class="sep"></div>
+            <button type="button" onclick="fmt('h3')" title="Heading">H</button>
+          </div>
           <textarea id="idea" name="idea" placeholder="Describe your idea..." required></textarea>
         </div>
 
@@ -313,6 +366,73 @@
 <script>
   const WORKER_URL = "https://promptuos-ideas.alexgonza.workers.dev";
 
+  // Formatting toolbar
+  function fmt(type) {
+    const ta = document.getElementById("idea");
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const sel = ta.value.substring(start, end);
+    let before, after, insert;
+
+    switch (type) {
+      case "bold":
+        before = "**"; after = "**";
+        insert = sel ? before + sel + after : before + "bold text" + after;
+        break;
+      case "italic":
+        before = "_"; after = "_";
+        insert = sel ? before + sel + after : before + "italic text" + after;
+        break;
+      case "ul":
+        insert = sel
+          ? sel.split("\n").map(l => "- " + l).join("\n")
+          : "- ";
+        break;
+      case "ol":
+        insert = sel
+          ? sel.split("\n").map((l, i) => (i + 1) + ". " + l).join("\n")
+          : "1. ";
+        break;
+      case "h3":
+        insert = sel ? "### " + sel : "### ";
+        break;
+      default: return;
+    }
+
+    ta.focus();
+    // Use execCommand for undo support, fall back to manual
+    ta.setRangeText(insert, start, end, "end");
+    ta.dispatchEvent(new Event("input"));
+  }
+
+  // Simple markdown to HTML renderer
+  function renderMarkdown(text) {
+    if (!text) return "";
+    let html = escapeHtml(text);
+    // Headings (### )
+    html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+    // Bold
+    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    // Italic
+    html = html.replace(/(?<!\w)_(.+?)_(?!\w)/g, "<em>$1</em>");
+    // Unordered lists — group consecutive lines
+    html = html.replace(/((?:^- .+\n?)+)/gm, (match) => {
+      const items = match.trim().split("\n").map(l => "<li>" + l.replace(/^- /, "") + "</li>").join("");
+      return "<ul>" + items + "</ul>";
+    });
+    // Ordered lists — group consecutive lines
+    html = html.replace(/((?:^\d+\. .+\n?)+)/gm, (match) => {
+      const items = match.trim().split("\n").map(l => "<li>" + l.replace(/^\d+\. /, "") + "</li>").join("");
+      return "<ol>" + items + "</ol>";
+    });
+    // Line breaks (not inside tags)
+    html = html.replace(/\n/g, "<br>");
+    // Clean up extra <br> around block elements
+    html = html.replace(/<br>(<\/?(?:ul|ol|li|h3)>)/g, "$1");
+    html = html.replace(/(<\/?(?:ul|ol|li|h3)>)<br>/g, "$1");
+    return html;
+  }
+
   async function loadIdeas() {
     const container = document.getElementById("ideas-list");
     const countEl = document.getElementById("ideas-count");
@@ -338,7 +458,7 @@
         return `
           <div class="idea-card ${priorityClass}">
             <div class="idea-title">${escapeHtml(idea.title)}</div>
-            ${idea.body ? `<div class="idea-body">${escapeHtml(idea.body)}</div>` : ""}
+            ${idea.body ? `<div class="idea-body">${renderMarkdown(idea.body)}</div>` : ""}
             <div class="idea-meta">
               ${categoryTag}
               ${priorityTag}
