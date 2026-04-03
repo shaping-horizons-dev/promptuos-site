@@ -87,7 +87,34 @@
     box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
     background: #fff;
   }
-  textarea { resize: vertical; min-height: 100px; border-radius: 0 0 10px 10px; border-top: none; }
+  textarea { resize: vertical; min-height: 100px; border-radius: 0 0 10px 10px; border-top: none; display: none; }
+  .editor {
+    min-height: 100px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 10px 12px;
+    border: 1.5px solid #d1d5db;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f9fafb;
+    outline: none;
+    line-height: 1.5;
+  }
+  .editor:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+    background: #fff;
+  }
+  .editor:empty::before {
+    content: "Describe your idea...";
+    color: #94a3b8;
+    pointer-events: none;
+  }
+  .editor ul, .editor ol { padding-left: 20px; margin: 4px 0; }
+  .editor li { margin-bottom: 2px; }
   .toolbar {
     display: flex;
     gap: 2px;
@@ -410,7 +437,8 @@
             <div class="sep"></div>
             <button type="button" onclick="fmt('h3')" title="Heading">H</button>
           </div>
-          <textarea id="idea" name="idea" placeholder="Describe your idea..." required></textarea>
+          <div class="editor" id="editor" contenteditable="true"></div>
+          <textarea id="idea" name="idea" required></textarea>
         </div>
 
         <div class="field">
@@ -473,68 +501,96 @@
     return false;
   }
 
-  // Formatting toolbar
+  // WYSIWYG toolbar — uses execCommand for real formatting
   function fmt(type) {
-    const ta = document.getElementById("idea");
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const sel = ta.value.substring(start, end);
-    let before, after, insert;
-
+    const editor = document.getElementById("editor");
+    editor.focus();
     switch (type) {
-      case "bold":
-        before = "**"; after = "**";
-        insert = sel ? before + sel + after : before + "bold text" + after;
-        break;
-      case "italic":
-        before = "_"; after = "_";
-        insert = sel ? before + sel + after : before + "italic text" + after;
-        break;
-      case "ul":
-        insert = sel
-          ? sel.split("\n").map(l => "- " + l).join("\n")
-          : "- ";
-        break;
-      case "ol":
-        insert = sel
-          ? sel.split("\n").map((l, i) => (i + 1) + ". " + l).join("\n")
-          : "1. ";
-        break;
+      case "bold": document.execCommand("bold"); break;
+      case "italic": document.execCommand("italic"); break;
+      case "ul": document.execCommand("insertUnorderedList"); break;
+      case "ol": document.execCommand("insertOrderedList"); break;
       case "h3":
-        insert = sel ? "### " + sel : "### ";
+        // Toggle heading: if already in a h3, revert to paragraph
+        const sel = window.getSelection();
+        const block = sel.anchorNode?.parentElement?.closest("h3");
+        if (block) {
+          document.execCommand("formatBlock", false, "div");
+        } else {
+          document.execCommand("formatBlock", false, "h3");
+        }
         break;
-      default: return;
     }
-
-    ta.focus();
-    // Use execCommand for undo support, fall back to manual
-    ta.setRangeText(insert, start, end, "end");
-    ta.dispatchEvent(new Event("input"));
   }
 
-  // Simple markdown to HTML renderer
+  // Convert editor HTML to markdown for GitHub Issues
+  function htmlToMarkdown(html) {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+
+    function walk(node) {
+      let md = "";
+      for (const child of node.childNodes) {
+        if (child.nodeType === 3) {
+          md += child.textContent;
+        } else if (child.nodeType === 1) {
+          const tag = child.tagName.toLowerCase();
+          const inner = walk(child);
+          switch (tag) {
+            case "b": case "strong": md += `**${inner}**`; break;
+            case "i": case "em": md += `_${inner}_`; break;
+            case "h3": md += `### ${inner}\n`; break;
+            case "ul": md += inner; break;
+            case "ol": md += inner; break;
+            case "li":
+              const parent = child.parentElement?.tagName.toLowerCase();
+              if (parent === "ol") {
+                const idx = Array.from(child.parentElement.children).indexOf(child) + 1;
+                md += `${idx}. ${inner}\n`;
+              } else {
+                md += `- ${inner}\n`;
+              }
+              break;
+            case "br": md += "\n"; break;
+            case "div": case "p": md += (md && !md.endsWith("\n") ? "\n" : "") + inner; break;
+            default: md += inner;
+          }
+        }
+      }
+      return md;
+    }
+    return walk(tmp).trim();
+  }
+
+  // Sync editor content to hidden textarea before submit
+  document.querySelector(".form-card form").addEventListener("submit", function(e) {
+    const editor = document.getElementById("editor");
+    const textarea = document.getElementById("idea");
+    const md = htmlToMarkdown(editor.innerHTML);
+    if (!md.trim()) {
+      e.preventDefault();
+      editor.focus();
+      return;
+    }
+    textarea.value = md;
+  });
+
+  // Render markdown from GitHub Issues to HTML for display
   function renderMarkdown(text) {
     if (!text) return "";
     let html = escapeHtml(text);
-    // Headings (### )
     html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
-    // Bold
     html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    // Italic
     html = html.replace(/(?<!\w)_(.+?)_(?!\w)/g, "<em>$1</em>");
-    // Unordered lists — group consecutive lines
     html = html.replace(/((?:^- .+\n?)+)/gm, (match) => {
       const items = match.trim().split("\n").map(l => "<li>" + l.replace(/^- /, "") + "</li>").join("");
       return "<ul>" + items + "</ul>";
     });
-    // Ordered lists — group consecutive lines
     html = html.replace(/((?:^\d+\. .+\n?)+)/gm, (match) => {
       const items = match.trim().split("\n").map(l => "<li>" + l.replace(/^\d+\. /, "") + "</li>").join("");
       return "<ol>" + items + "</ol>";
     });
-    // Line breaks (not inside tags)
     html = html.replace(/\n/g, "<br>");
-    // Clean up extra <br> around block elements
     html = html.replace(/<br>(<\/?(?:ul|ol|li|h3)>)/g, "$1");
     html = html.replace(/(<\/?(?:ul|ol|li|h3)>)<br>/g, "$1");
     return html;
