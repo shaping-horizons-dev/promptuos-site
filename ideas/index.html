@@ -620,8 +620,7 @@
 
         return `
           <div class="idea-card ${priorityClass}">
-            <div class="idea-title">${escapeHtml(idea.title)}</div>
-            ${idea.body ? `<div class="idea-body">${renderMarkdown(idea.body)}</div>` : ""}
+            <div class="idea-body">${idea.body ? renderMarkdown(idea.body) : escapeHtml(idea.title)}</div>
             <div class="idea-meta">
               ${categoryTag}
               ${priorityTag}
